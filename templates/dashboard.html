@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Dashboard</h2>
+    <span class="text-muted small">{{ stats.unallocated_count }} unallocated</span>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3">
+            <div class="text-muted small">Students</div>
+            <div class="fs-3 fw-bold">{{ stats.total_students }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3">
+            <div class="text-muted small">Parents</div>
+            <div class="fs-3 fw-bold">{{ stats.total_parents }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card p-3" style="border-left:4px solid #dc3545">
+            <div class="text-muted small">Unallocated</div>
+            <div class="fs-3 fw-bold text-danger">{{ stats.unallocated_count }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card p-3">
+            <div class="text-muted small">Allocated today</div>
+            <div class="fs-3 fw-bold">{{ stats.allocated_today }}</div>
+        </div>
+    </div>
+</div>
+
+{% if unallocated %}
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white d-flex justify-content-between">
+        <span><i class="bi bi-exclamation-triangle"></i> Unallocated Money – Needs Attention</span>
+        <a href="{{ url_for('transactions', status='unallocated') }}" class="text-white small">View all</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Amount</th>
+                    <th>Sender</th>
+                    <th>Phone</th>
+                    <th>Code</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in unallocated %}
+                <tr>
+                    <td class="small">{{ t.received_at.strftime('%d %b %H:%M') if t.received_at else '-' }}</td>
+                    <td class="fw-bold">Ksh {{ "{:,.0f}".format(t.amount) }}</td>
+                    <td>{{ t.sender_name or '-' }}</td>
+                    <td class="phone">{{ t.sender_phone or '-' }}</td>
+                    <td><code>{{ t.mpesa_code or '-' }}</code></td>
+                    <td>
+                        <a href="{{ url_for('transactions', status='unallocated') }}" class="btn btn-sm btn-outline-primary">Allocate</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-success">
+    <i class="bi bi-check-circle"></i> No unallocated money right now. All recent payments matched to students.
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">Recent Transactions</div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Student</th>
+                    <th>Sender Phone</th>
+                    <th>Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in recent %}
+                <tr>
+                    <td class="small">{{ t.received_at.strftime('%d %b %H:%M') if t.received_at else '-' }}</td>
+                    <td>Ksh {{ "{:,.0f}".format(t.amount) }}</td>
+                    <td>
+                        {% if t.status == 'unallocated' %}
+                            <span class="badge badge-unallocated">Unallocated</span>
+                        {% else %}
+                            <span class="badge badge-allocated">Allocated</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ t.student.full_name if t.student else '-' }}</td>
+                    <td class="phone small">{{ t.sender_phone or '-' }}</td>
+                    <td><code class="small">{{ t.mpesa_code or '-' }}</code></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No transactions yet. Configure SMS forwarder.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

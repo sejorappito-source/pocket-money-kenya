@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Parents{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Parents / Guardians</h2>
+    <a href="{{ url_for('add_parent') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Add Parent</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone (M-Pesa)</th>
+                    <th>Linked Students</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in parents %}
+                <tr>
+                    <td class="fw-semibold">{{ p.full_name }}</td>
+                    <td class="phone">{{ p.phone }}</td>
+                    <td>
+                        {% if p.students %}
+                            {% for s in p.students %}
+                                <span class="badge bg-light text-dark border me-1">{{ s.full_name }} ({{ s.student_id }})</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_parent', pid=p.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <form method="post" action="{{ url_for('delete_parent', pid=p.id) }}" class="d-inline" onsubmit="return confirm('Delete this parent?')">
+                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center text-muted py-5">No parents yet. Add parents and link them to students.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
