@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if student else 'Add' }} Student{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h3 class="mb-4">{{ 'Edit' if student else 'Add' }} Student</h3>
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Student ID / Admission No. *</label>
+                    <input type="text" name="student_id" class="form-control" required
+                           value="{{ student.student_id if student else '' }}"
+                           placeholder="e.g. ADM-2024-001">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" name="full_name" class="form-control" required
+                           value="{{ student.full_name if student else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Class / Grade</label>
+                    <input type="text" name="class_name" class="form-control"
+                           value="{{ student.class_name if student else '' }}"
+                           placeholder="e.g. Grade 5 Blue">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes</label>
+                    <textarea name="notes" class="form-control" rows="2">{{ student.notes if student else '' }}</textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success">Save</button>
+                    <a href="{{ url_for('students') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Transactions</h2>
+    <div class="btn-group">
+        <a href="{{ url_for('transactions', status='all') }}" class="btn btn-sm {{ 'btn-success' if status=='all' else 'btn-outline-success' }}">All</a>
+        <a href="{{ url_for('transactions', status='unallocated') }}" class="btn btn-sm {{ 'btn-danger' if status=='unallocated' else 'btn-outline-danger' }}">Unallocated</a>
+        <a href="{{ url_for('transactions', status='allocated') }}" class="btn btn-sm {{ 'btn-primary' if status=='allocated' else 'btn-outline-primary' }}">Allocated</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Student</th>
+                    <th>Sender</th>
+                    <th>Phone</th>
+                    <th>Code</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr class="{{ 'table-danger' if t.status=='unallocated' else '' }}">
+                    <td class="small">{{ t.received_at.strftime('%d %b %Y %H:%M') if t.received_at else '-' }}</td>
+                    <td class="fw-bold">Ksh {{ "{:,.0f}".format(t.amount) }}</td>
+                    <td>
+                        {% if t.status == 'unallocated' %}
+                            <span class="badge bg-danger">Unallocated</span>
+                        {% elif t.status == 'manual' %}
+                            <span class="badge bg-warning text-dark">Manual</span>
+                        {% else %}
+                            <span class="badge bg-success">Auto</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ t.student.full_name if t.student else '—' }}</td>
+                    <td>{{ t.sender_name or '—' }}</td>
+                    <td class="phone">{{ t.sender_phone or '—' }}</td>
+                    <td><code>{{ t.mpesa_code or '—' }}</code></td>
+                    <td>
+                        {% if t.status == 'unallocated' %}
+                        <form method="post" action="{{ url_for('allocate_transaction', txn_id=t.id) }}" class="d-flex gap-1">
+                            <select name="student_id" class="form-select form-select-sm" required style="min-width:140px">
+                                <option value="">Select student…</option>
+                                {% for s in students %}
+                                <option value="{{ s.id }}">{{ s.full_name }} ({{ s.student_id }})</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-sm btn-success">Allocate</button>
+                        </form>
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center text-muted py-5">No transactions found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
